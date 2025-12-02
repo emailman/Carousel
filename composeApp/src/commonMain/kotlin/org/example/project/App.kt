@@ -128,7 +128,7 @@ fun CarouselApp() {
 
                         // Rotate the horse about its center
                         // so that its long side is tangent to the orbit
-                        rotate(orientationDeg, pivot = Offset.Zero)
+                        rotate(orientationDeg)
                     }) {
                         // Draw a rectangle centered at (0, 0)
                         drawRect(
@@ -162,7 +162,8 @@ fun ControlPanel(
     onStart: () -> Unit,
     onStop: () -> Unit
 ) {
-    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+    Column(horizontalAlignment =
+        androidx.compose.ui.Alignment.CenterHorizontally) {
         Button(onClick = {
             isRunning.value = true
             onStart()
