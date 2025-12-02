@@ -10,7 +10,7 @@ fun main() = application {
     val windowState = rememberWindowState(size = DpSize(600.dp, 800.dp))
     Window(
         onCloseRequest = ::exitApplication,
-        title = "KotlinProject",
+        title = "Carousel",
         state = windowState
     ) {
         CarouselApp()

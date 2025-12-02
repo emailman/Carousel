@@ -1,7 +1,7 @@
 package org.example.project
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -47,14 +47,15 @@ fun CarouselApp() {
     fun startRide() {
         scope.launch {
             isRunning.value = true
+            angle.snapTo(0f)
             completedRevolutions.value = 0
             val targetAngle = angle.value + revolutions.value * 360f
 
             angle.animateTo(
                 targetValue = targetAngle,
                 animationSpec = tween(
-                    durationMillis = (5000 * revolutions.value),
-                    easing = LinearEasing
+                    durationMillis = (7500 * revolutions.value),
+                    easing = LinearOutSlowInEasing
                 )
             )
             isRunning.value = false
@@ -64,6 +65,7 @@ fun CarouselApp() {
     fun stopRide() {
         scope.launch {
             angle.stop()
+            completedRevolutions.value = 0
             isRunning.value = false
         }
     }
@@ -148,12 +150,10 @@ fun CarouselApp() {
 
         InfoPanel(
             isRunning = isRunning.value,
-            completedRevolutions = completedRevolutions.value,
-            totalRevolutions = revolutions.value
+            completedRevolutions = completedRevolutions.value
         )
     }
 }
-
 
 @Composable
 fun ControlPanel(
@@ -198,18 +198,18 @@ fun ControlPanel(
 @Composable
 fun InfoPanel(
     isRunning: Boolean,
-    completedRevolutions: Int,
-    totalRevolutions: Int
+    completedRevolutions: Int
 ) {
     Column(horizontalAlignment =
         androidx.compose.ui.Alignment.CenterHorizontally) {
         Text(
-            text = if (isRunning) "Ride in progress" else "Stopped",
+            text = if (isRunning) "Status: Ride in progress"
+                        else "Status: Stopped",
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "Revolutions: $completedRevolutions / $totalRevolutions",
-            style = MaterialTheme.typography.bodyLarge
+            text = "Revolutions: $completedRevolutions",
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }
