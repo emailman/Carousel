@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -26,28 +25,6 @@ const val HORSE_WIDTH = 30f
 const val HORSE_HEIGHT = 10f
 const val HORSE_COUNT = 8
 
-// Data class for horse position (angle in degrees)
-data class HorsePosition(val x: Float, val y: Float, val angleDeg: Float)
-
-// Compute position of one horse
-fun horsePosition(index: Int, centerX: Float, centerY: Float):
-        HorsePosition {
-    val angleStep = 360.0 / HORSE_COUNT
-    val thetaDeg = index * angleStep
-    val thetaRad = thetaDeg * PI / 180.0   // convert degrees to radians
-
-    val x = (centerX + HORSE_ORBIT_RADIUS * cos(thetaRad)).toFloat()
-    val y = (centerY + HORSE_ORBIT_RADIUS * sin(thetaRad)).toFloat()
-
-    val orientationDeg = thetaDeg.toFloat() + 90f
-    return HorsePosition(x, y, orientationDeg)
-}
-
-// Compute all horse positions
-fun allHorsePositions(centerX: Float, centerY: Float): List<HorsePosition> {
-    return (0 until HORSE_COUNT).map { horsePosition(it, centerX, centerY) }
-}
-
 // Color palette for horses
 fun horseColor(index: Int): Color {
     val palette = listOf(
@@ -57,22 +34,6 @@ fun horseColor(index: Int): Color {
         Color.Magenta, Color.Gray
     )
     return palette[index % palette.size]
-}
-
-// Drawing helper for horses
-fun DrawScope.drawHorse(horse: HorsePosition,
-                        color: Color,
-                        globalRotationDeg: Float) {
-    withTransform({
-        translate(horse.x, horse.y)
-        rotate(horse.angleDeg) // remove globalRotationDeg from here
-    }) {
-        drawRect(
-            color = color,
-            topLeft = Offset(-HORSE_WIDTH / 2, -HORSE_HEIGHT / 2),
-            size = Size(HORSE_WIDTH, HORSE_HEIGHT)
-        )
-    }
 }
 
 @Composable
@@ -116,56 +77,60 @@ fun CarouselApp() {
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        Canvas(modifier = Modifier.size(500.dp)) {
-            val center = Offset(size.width / 2f, size.height / 2f)
+            Canvas(modifier = Modifier.size(500.dp)) {
+                val center = Offset(size.width / 2f, size.height / 2f)
 
-            // Platform circle
-            drawCircle(
-                color = Color.LightGray,
-                radius = PLATFORM_RADIUS,
-                center = center
-            )
-
-            // Rotating hub
-            withTransform({
-                translate(center.x, center.y)
-                rotate(angle.value)
-            }) {
-                drawRect(
-                    color = Color.Black,
-                    topLeft = Offset(-5f, -5f),
-                    size = Size(10f, 10f)
+                // Platform circle
+                drawCircle(
+                    color = Color.LightGray,
+                    radius = PLATFORM_RADIUS,
+                    center = center
                 )
-            }
 
-            // Horses: include global rotation in theta, then do a single local transform
-            repeat(HORSE_COUNT) { i ->
-                val stepDeg = 360f / HORSE_COUNT
-                val horseBaseDeg = i * stepDeg
-                val totalDeg = horseBaseDeg + angle.value    // carousel rotation added here
-
-                val thetaRad = totalDeg * PI / 180.0
-                val relX = (HORSE_ORBIT_RADIUS * cos(thetaRad)).toFloat()
-                val relY = (HORSE_ORBIT_RADIUS * sin(thetaRad)).toFloat()
-
-                // Tangent orientation
-                val orientationDeg = totalDeg + 90f
-
+                // Hub (unchanged)
                 withTransform({
-                    // Move to this horse’s absolute position
-                    translate(center.x + relX, center.y + relY)
-
-                    // Rotate the horse so it faces along the orbit
-                    // rotate(orientationDeg)
+                    rotate(
+                        degrees = angle.value,
+                        pivot = center
+                    )
                 }) {
                     drawRect(
-                        color = horseColor(i),
-                        topLeft = Offset(-HORSE_WIDTH / 2, -HORSE_HEIGHT / 2),
-                        size = Size(HORSE_WIDTH, HORSE_HEIGHT)
+                        color = Color.Black,
+                        topLeft = Offset(center.x - 5f, center.y - 5f),
+                        size = Size(10f, 10f)
                     )
                 }
+
+                // --- Horses: correct starting positions and tangent orientation ---
+                val stepDeg = 360f / HORSE_COUNT
+
+                repeat(HORSE_COUNT) { i ->
+                    // Angle of this horse on the orbit, including carousel rotation
+                    val thetaDeg = i * stepDeg + angle.value
+                    val thetaRad = thetaDeg * PI / 180.0
+
+                    // Horse center on the orbit
+                    val cx = center.x + (HORSE_ORBIT_RADIUS * cos(thetaRad)).toFloat()
+                    val cy = center.y + (HORSE_ORBIT_RADIUS * sin(thetaRad)).toFloat()
+
+                    // Tangent: perpendicular to radius
+                    // val orientationDeg = thetaDeg + 90f
+
+                    withTransform({
+                        // Move local origin to the horse center
+                        translate(cx, cy)
+                        // Rotate the horse about its center so that its long side is tangent
+                        // rotate(orientationDeg)
+                    }) {
+                        // Draw a rectangle centered at (0, 0)
+                        drawRect(
+                            color = horseColor(i),
+                            topLeft = Offset(-HORSE_WIDTH / 2f, -HORSE_HEIGHT / 2f),
+                            size = Size(HORSE_WIDTH, HORSE_HEIGHT)
+                        )
+                    }
+                }
             }
-        }
 
         ControlPanel(
             revolutions = revolutions,
