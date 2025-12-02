@@ -128,7 +128,7 @@ fun CarouselApp() {
 
                         // Rotate the horse about its center
                         // so that its long side is tangent to the orbit
-                        rotate(orientationDeg)
+                        rotate(orientationDeg, pivot = Offset.Zero)
                     }) {
                         // Draw a rectangle centered at (0, 0)
                         drawRect(
