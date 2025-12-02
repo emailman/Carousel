@@ -74,7 +74,8 @@ fun CarouselApp() {
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+        horizontalAlignment =
+            androidx.compose.ui.Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
             Canvas(modifier = Modifier.size(500.dp)) {
@@ -87,7 +88,7 @@ fun CarouselApp() {
                     center = center
                 )
 
-                // Hub (unchanged)
+                // Hub
                 withTransform({
                     rotate(
                         degrees = angle.value,
@@ -101,17 +102,20 @@ fun CarouselApp() {
                     )
                 }
 
-                // --- Horses: correct starting positions and tangent orientation ---
+                // Horses
                 val stepDeg = 360f / HORSE_COUNT
 
                 repeat(HORSE_COUNT) { i ->
-                    // Angle of this horse on the orbit, including carousel rotation
+                    // Angle of this horse on the orbit,
+                    // including carousel rotation
                     val thetaDeg = i * stepDeg + angle.value
                     val thetaRad = thetaDeg * PI / 180.0
 
                     // Horse center on the orbit
-                    val cx = center.x + (HORSE_ORBIT_RADIUS * cos(thetaRad)).toFloat()
-                    val cy = center.y + (HORSE_ORBIT_RADIUS * sin(thetaRad)).toFloat()
+                    val cx = center.x +
+                            (HORSE_ORBIT_RADIUS * cos(thetaRad)).toFloat()
+                    val cy = center.y +
+                            (HORSE_ORBIT_RADIUS * sin(thetaRad)).toFloat()
 
                     // Tangent: perpendicular to radius
                     // val orientationDeg = thetaDeg + 90f
@@ -119,13 +123,16 @@ fun CarouselApp() {
                     withTransform({
                         // Move local origin to the horse center
                         translate(cx, cy)
-                        // Rotate the horse about its center so that its long side is tangent
+
+                        // Rotate the horse about its center
+                        // so that its long side is tangent
                         // rotate(orientationDeg)
                     }) {
                         // Draw a rectangle centered at (0, 0)
                         drawRect(
                             color = horseColor(i),
-                            topLeft = Offset(-HORSE_WIDTH / 2f, -HORSE_HEIGHT / 2f),
+                            topLeft = Offset(-HORSE_WIDTH / 2f,
+                                -HORSE_HEIGHT / 2f),
                             size = Size(HORSE_WIDTH, HORSE_HEIGHT)
                         )
                     }
