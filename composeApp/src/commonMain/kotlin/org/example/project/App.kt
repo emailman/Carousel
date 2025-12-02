@@ -118,15 +118,15 @@ fun CarouselApp() {
                             (HORSE_ORBIT_RADIUS * sin(thetaRad)).toFloat()
 
                     // Tangent: perpendicular to radius
-                    // val orientationDeg = thetaDeg + 90f
+                    val orientationDeg = thetaDeg + 90f
 
                     withTransform({
                         // Move local origin to the horse center
                         translate(cx, cy)
 
                         // Rotate the horse about its center
-                        // so that its long side is tangent
-                        // rotate(orientationDeg)
+                        // so that its long side is tangent to the orbit
+                        rotate(orientationDeg, pivot = Offset.Zero)
                     }) {
                         // Draw a rectangle centered at (0, 0)
                         drawRect(
